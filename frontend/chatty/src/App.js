@@ -19,7 +19,7 @@ socket.emit("chat",{messege,userName});
 setMessege("");
 }
 //Receive Message with useEffect
-useEffect(() => {
+useEffect(() => {userName =nanoid(4);
   socket.off("chat"); // Clear old listener before adding a new one
   socket.on("chat", (payload) => {
     setChat([...chat, payload]);
