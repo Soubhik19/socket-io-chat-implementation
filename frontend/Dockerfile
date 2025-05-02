@@ -23,7 +23,7 @@ FROM nginx:alpine
 # Copy the build folder from builder stage
 COPY --from=builder /app/build /usr/share/nginx/html
 
-EXPOSE 80
+EXPOSE 3000
 
 # Run nginx
 CMD ["nginx", "-g", "daemon off;"]
