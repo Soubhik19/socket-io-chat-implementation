@@ -1,5 +1,4 @@
 # Step 1: Build phase
-# Step 1: Build phase
 FROM node:18-alpine AS builder
 
 # Set working directory
@@ -23,7 +22,8 @@ FROM nginx:alpine
 # Copy the build folder from builder stage
 COPY --from=builder /app/build /usr/share/nginx/html
 
-EXPOSE 3000
+# Expose port 80 as Nginx serves on port 80 by default
+EXPOSE 80
 
 # Run nginx
 CMD ["nginx", "-g", "daemon off;"]
