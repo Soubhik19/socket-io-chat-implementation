@@ -16,10 +16,10 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    // Build backend image
+                    echo "Building backend image..."
                     sh 'docker build -t $BACKEND_IMAGE ./backend'
 
-                    // Build frontend image
+                    echo "Building frontend image..."
                     sh 'docker build -t $FRONTEND_IMAGE -f frontend/Dockerfile .'
                 }
             }
@@ -27,26 +27,25 @@ pipeline {
 
         stage('Start Services with Docker Compose') {
             steps {
-                sh 'docker-compose up -d'
+                sh 'docker-compose up -d --build'
             }
         }
 
-        // Optional test stage
-        // stage('Run Tests') {
-        //     steps {
-        //         sh 'docker exec backend npm test' // adjust if needed
-        //     }
-        // }
-
         stage('Verify Deployment') {
             steps {
-                sh 'curl --fail http://localhost:3000 || echo "Frontend not reachable"'
-                sh 'curl --fail http://localhost:5000 || echo "Backend not reachable"'
+                script {
+                    echo "Checking if frontend is up..."
+                    sh 'curl --retry 5 --retry-delay 3 http://localhost:3000 || echo "Frontend not reachable"'
+
+                    echo "Checking if backend is up..."
+                    sh 'curl --retry 5 --retry-delay 3 http://localhost:5000 || echo "Backend not reachable"'
+                }
             }
         }
 
         stage('Teardown') {
             steps {
+                echo "Shutting down Docker containers..."
                 sh 'docker-compose down'
             }
         }

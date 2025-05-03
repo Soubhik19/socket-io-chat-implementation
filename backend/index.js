@@ -12,6 +12,16 @@ const io =require('socket.io')(server,{
       }
 });
 
+// Add this route to prevent 404 on GET /
+app.get('/', (req, res) => {
+    res.send('Socket.io Chat Server is Running');
+});
+
+//  Optional: Jenkins can use this for health check
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
 //  server side connection 
 io.on("connection", (socket) => {
     console.log(`someone is connected on ${socket.id}`);
