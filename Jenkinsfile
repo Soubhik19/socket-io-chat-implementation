@@ -38,7 +38,7 @@ pipeline {
                     sh 'curl --retry 5 --retry-delay 3 http://localhost:3000 || echo "Frontend not reachable"'
 
                     echo "Checking if backend is up..."
-                    sh 'curl --retry 5 --retry-delay 3 http://localhost:5000 || echo "Backend not reachable"'
+                    sh 'curl --retry 5 --retry-delay 3 http://localhost:5001 || echo "Backend not reachable"'
                 }
             }
         }
