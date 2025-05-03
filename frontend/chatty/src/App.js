@@ -1,54 +1,62 @@
 import logo from './logo.svg';
-import {useState,useEffect, use, useSyncExternalStore} from 'react'
-import {io} from 'socket.io-client'
-import {nanoid} from 'nanoid'
+import { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
+import { nanoid } from 'nanoid';
 
 import './App.css';
 
+// Initialize socket connection
 const socket = io.connect("http://localhost:5000");
-const userName =nanoid(4);
+
+// Generate userName once during initialization
+const userName = nanoid(4);
+
 function App() {
-//we need state a messege of a messege itself
-const [messege,setMessege]=useState("")   //this is the state where we sending the messege to the socket 
-const [chat, setChat]=useState([])
+  // State for message input and chat history
+  const [message, setMessage] = useState("");
+  const [chat, setChat] = useState([]);
 
-//send messege fuction
-const sendChat =(e)=>{
-e.preventDefault()
-socket.emit("chat",{messege,userName});
-setMessege("");
-}
-//Receive Message with useEffect
-useEffect(() => {userName =nanoid(4);
-  socket.off("chat"); // Clear old listener before adding a new one
-  socket.on("chat", (payload) => {
-    setChat([...chat, payload]);
-  });
-}, [chat]);
+  // Send chat message to backend
+  const sendChat = (e) => {
+    e.preventDefault();
+    socket.emit("chat", { message, userName });
+    setMessage(""); // Clear the message input after sending
+  };
 
+  // Listen for incoming chat messages
+  useEffect(() => {
+    socket.off("chat"); // Clear old listener before adding a new one
 
+    socket.on("chat", (payload) => {
+      setChat((prevChat) => [...prevChat, payload]); // Add new message to chat history
+    });
 
- return (
+    return () => {
+      socket.off("chat"); // Cleanup listener on unmount
+    };
+  }, []); // Empty dependency array ensures this only runs once when the component mounts
+
+  return (
     <div className="App">
-        <header className="App-header">
-         <h1>Chatty App</h1>
+      <header className="App-header">
+        <h1>Chatty App</h1>
 
-          
-         <form onSubmit={sendChat}>                  
-          <input type="text" name='chat' 
-          placeholder='send messege'
-          value={messege}
-          onChange={(e)=>{
-          setMessege(e.target.value)
-  }}
-  />
-  <button type='submit'>Send</button>
-</form>
-{chat.map((payload,index)=>{          //Display Messages
-            return <p key={index}>{payload.messege}:<span>id:{payload.userName}</span></p>
-          })}
+        <form onSubmit={sendChat}>
+          <input
+            type="text"
+            name="chat"
+            placeholder="Send message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)} // Update message state on input change
+          />
+          <button type="submit">Send</button>
+        </form>
 
-
+        {chat.map((payload, index) => (
+          <p key={index}>
+            {payload.message}: <span>id:{payload.userName}</span>
+          </p>
+        ))}
       </header>
     </div>
   );
